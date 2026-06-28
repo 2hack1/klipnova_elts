@@ -42,7 +42,7 @@ export function MapView({ center, zoom = 14, markers = [], path = [], height = "
       }
       // Path
       if (path.length > 1) {
-        const poly = L.polyline(path.map((p) => [p.lat, p.lng]), { color: "#1d4ed8", weight: 4, opacity: 0.8 }).addTo(map);
+        const poly = L.polyline(path.map((p) => [p.lat, p.lng] as [number, number]), { color: "#1d4ed8", weight: 4, opacity: 0.8 }).addTo(map);
         layersRef.current.push(poly);
         map.fitBounds(poly.getBounds(), { padding: [30, 30] });
       } else if (center) {
