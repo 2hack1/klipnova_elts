@@ -1,0 +1,13 @@
+{
+  "name": "Employee Location Tracking System",
+  "short_name": "ELTS",
+  "description": "Track field employees, attendance, travel and visits in real time.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#1d4ed8",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
