@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Plus, Users, MapPin, Activity, Trash2, Eye, Crosshair } from "lucide-react";
 import { getCurrentPosition, formatDuration } from "@/lib/geo";
+import { useServerFn } from "@tanstack/react-start";
+import { adminCreateEmployee } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({ component: AdminPanel });
 
@@ -101,25 +103,18 @@ function EmployeesTab() {
   }
   useEffect(() => { void load(); }, []);
 
+  const createEmployee = useServerFn(adminCreateEmployee);
   async function create() {
     if (!form.email || !form.password || !form.employee_code) return toast.error("Email, password and code required");
+    if (form.password.length < 8) return toast.error("Password must be at least 8 characters");
     setBusy(true);
     try {
-      const { data: signUp, error: e1 } = await supabase.auth.signUp({
+      await createEmployee({ data: {
         email: form.email, password: form.password,
-        options: { data: { full_name: form.full_name, phone: form.phone } },
-      });
-      if (e1) throw e1;
-      const uid = signUp.user?.id;
-      if (!uid) throw new Error("Sign-up did not return a user id");
-      await new Promise((r) => setTimeout(r, 700));
-      // Trigger auto-creates employee with generated code; update with admin-provided code & details
-      const { error: e2 } = await supabase.from("employees").update({
+        full_name: form.full_name, phone: form.phone,
         employee_code: form.employee_code,
-        department: form.department || null,
-        designation: form.designation || null,
-      }).eq("user_id", uid);
-      if (e2) throw e2;
+        department: form.department, designation: form.designation,
+      }});
       toast.success("Employee created");
       setOpen(false);
       setForm({ email: "", password: "", full_name: "", employee_code: "", department: "", designation: "", phone: "" });
@@ -404,13 +399,21 @@ function LocationsTab() {
 
 function LiveMap() {
   const [markers, setMarkers] = useState<any[]>([]);
+  const [list, setList] = useState<{ name: string; code: string; status: "in" | "out" | "none"; at?: string }[]>([]);
   useEffect(() => {
     let stop = false;
     async function tick() {
-      const { data: logs } = await supabase
-        .from("location_logs")
-        .select("latitude,longitude,recorded_at,employee_id")
-        .order("recorded_at", { ascending: false }).limit(500);
+      const today = new Date().toISOString().slice(0, 10);
+      const [{ data: logs }, { data: emps }, { data: att }] = await Promise.all([
+        supabase.from("location_logs").select("latitude,longitude,recorded_at,employee_id").order("recorded_at", { ascending: false }).limit(1000),
+        supabase.from("employees").select("id, user_id, employee_code"),
+        supabase.from("attendance").select("employee_id, punch_in_at, punch_out_at").eq("work_date", today),
+      ]);
+      const profileMap = await loadProfileMap((emps ?? []).map((e) => e.user_id));
+      const empMap = new Map((emps ?? []).map((e) => [e.id, e]));
+      const attMap = new Map((att ?? []).map((a: any) => [a.employee_id, a]));
+
+      // latest location per employee
       const seen = new Set<string>();
       const latest: any[] = [];
       for (const r of logs ?? []) {
@@ -418,24 +421,78 @@ function LiveMap() {
         seen.add(r.employee_id);
         latest.push(r);
       }
-      if (latest.length === 0) { if (!stop) setMarkers([]); return; }
-      const { data: emps } = await supabase.from("employees").select("id, user_id, employee_code").in("id", latest.map((l) => l.employee_id));
-      const profileMap = await loadProfileMap((emps ?? []).map((e) => e.user_id));
-      const empMap = new Map((emps ?? []).map((e) => [e.id, e]));
+
+      function statusOf(empId: string): "in" | "out" | "none" {
+        const a = attMap.get(empId) as any;
+        if (!a) return "none";
+        if (a.punch_in_at && !a.punch_out_at) return "in";
+        if (a.punch_out_at) return "out";
+        return "none";
+      }
+      function colorOf(s: "in" | "out" | "none") {
+        return s === "in" ? "#16a34a" : s === "out" ? "#dc2626" : "#64748b";
+      }
+
       const m = latest.map((r) => {
         const e = empMap.get(r.employee_id) as any;
         const name = e ? (profileMap[e.user_id]?.full_name ?? e.employee_code) : "Employee";
-        return { lat: Number(r.latitude), lng: Number(r.longitude), label: `${name} · ${new Date(r.recorded_at).toLocaleTimeString()}`, color: "#16a34a" };
+        const s = statusOf(r.employee_id);
+        const tag = s === "in" ? "🟢 Punched in" : s === "out" ? "🔴 Punched out" : "⚪ No attendance";
+        return {
+          lat: Number(r.latitude),
+          lng: Number(r.longitude),
+          label: `<b>${name}</b><br/>${tag}<br/><span style="opacity:.7">${new Date(r.recorded_at).toLocaleTimeString()}</span>`,
+          color: colorOf(s),
+        };
       });
-      if (!stop) setMarkers(m);
+
+      const roster = (emps ?? []).map((e: any) => {
+        const a = attMap.get(e.id) as any;
+        const s = statusOf(e.id);
+        return {
+          name: profileMap[e.user_id]?.full_name ?? e.employee_code,
+          code: e.employee_code,
+          status: s,
+          at: a ? (s === "in" ? a.punch_in_at : a.punch_out_at) ?? undefined : undefined,
+        };
+      }).sort((a, b) => (a.status === b.status ? 0 : a.status === "in" ? -1 : 1));
+
+      if (!stop) { setMarkers(m); setList(roster); }
     }
     void tick();
     const i = setInterval(tick, 15000);
     return () => { stop = true; clearInterval(i); };
   }, []);
+
+  const inCount = list.filter((l) => l.status === "in").length;
+  const outCount = list.filter((l) => l.status === "out").length;
+
   return (
-    <Card><CardHeader><CardTitle className="text-base">Last known location per employee</CardTitle></CardHeader>
-    <CardContent>{markers.length === 0 ? <p className="text-sm text-muted-foreground">No location data yet.</p> : <MapView height="500px" markers={markers} />}</CardContent></Card>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Live employee map</CardTitle>
+        <div className="flex flex-wrap gap-3 text-xs mt-1">
+          <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-emerald-600 inline-block" />Punched in: <b>{inCount}</b></span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-red-600 inline-block" />Punched out: <b>{outCount}</b></span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-slate-500 inline-block" />No attendance: <b>{list.length - inCount - outCount}</b></span>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {list.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {list.map((l) => (
+              <Badge key={l.code} variant="outline" className="gap-1.5">
+                <span className={`h-2 w-2 rounded-full inline-block ${l.status === "in" ? "bg-emerald-600" : l.status === "out" ? "bg-red-600" : "bg-slate-500"}`} />
+                {l.name} <span className="text-muted-foreground">({l.code})</span>
+              </Badge>
+            ))}
+          </div>
+        )}
+        {markers.length === 0
+          ? <p className="text-sm text-muted-foreground">No location data yet. Employees must start tracking to appear here.</p>
+          : <MapView height="500px" markers={markers} />}
+      </CardContent>
+    </Card>
   );
 }
 
