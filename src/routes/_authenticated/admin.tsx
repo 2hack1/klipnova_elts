@@ -266,8 +266,8 @@ function EmployeeDetailDialog({ employee, onClose }: { employee: any | null; onC
                   <TableRow key={s.id}>
                     <TableCell>{new Date(s.started_at).toLocaleString()}</TableCell>
                     <TableCell>{s.ended_at ? new Date(s.ended_at).toLocaleString() : "—"}</TableCell>
-                    <TableCell>{Number(s.total_distance_km ?? 0).toFixed(2)} km</TableCell>
-                    <TableCell>{formatDuration(Number(s.total_duration_seconds ?? 0))}</TableCell>
+                    <TableCell>{Number(s.total_km ?? 0).toFixed(2)} km</TableCell>
+                    <TableCell>{formatDuration(Number(s.duration_seconds ?? 0))}</TableCell>
                     <TableCell><Badge variant="outline">{s.status}</Badge></TableCell>
                   </TableRow>))}
                 </TableBody>
