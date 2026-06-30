@@ -213,8 +213,8 @@ function EmployeeDetailDialog({ employee, onClose }: { employee: any | null; onC
         supabase.from("daily_travel_summary").select("*").eq("employee_id", empId).order("work_date", { ascending: false }).limit(7),
         supabase.from("location_logs").select("latitude,longitude,recorded_at").eq("employee_id", empId).order("recorded_at", { ascending: false }).limit(1).maybeSingle(),
       ]);
-      const totalKm = (sessions.data ?? []).reduce((s, t) => s + Number(t.total_distance_km ?? 0), 0);
-      const totalSec = (sessions.data ?? []).reduce((s, t) => s + Number(t.total_duration_seconds ?? 0), 0);
+      const totalKm = (sessions.data ?? []).reduce((s, t: any) => s + Number(t.total_km ?? 0), 0);
+      const totalSec = (sessions.data ?? []).reduce((s, t: any) => s + Number(t.duration_seconds ?? 0), 0);
       const presentToday = (att.data ?? []).some((a) => a.work_date === today);
       setData({
         attendance: att.data ?? [], sessions: sessions.data ?? [], visits: visits.data ?? [],
