@@ -287,7 +287,7 @@ function EmployeesTab() {
               </TableRow>
             );
           })}
-          {rows.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-6">No employees yet.</TableCell></TableRow>}
+          {rows.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">No employees yet.</TableCell></TableRow>}
           </TableBody>
         </Table>
       </CardContent>
