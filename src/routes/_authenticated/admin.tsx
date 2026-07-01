@@ -13,17 +13,19 @@ import { Badge } from "@/components/ui/badge";
 import { MapView } from "@/components/MapView";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Users, MapPin, Activity, Trash2, Eye, Crosshair } from "lucide-react";
+import { Plus, Users, MapPin, Activity, Trash2, Eye, Crosshair, ShieldCheck, KeyRound, Power } from "lucide-react";
 import { getCurrentPosition, formatDuration } from "@/lib/geo";
 import { useServerFn } from "@tanstack/react-start";
-import { adminCreateEmployee } from "@/lib/admin-users.functions";
+import {
+  adminCreateEmployee, superCreateAccount, superSetActive, superResetPassword, listAccounts,
+} from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({ component: AdminPanel });
 
 type Profile = { id: string; full_name: string | null; phone: string | null };
 
 function AdminPanel() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading } = useAuth();
   const nav = useNavigate();
   useEffect(() => { if (!loading && !isAdmin) nav({ to: "/dashboard" }); }, [isAdmin, loading, nav]);
   if (!isAdmin) return null;
@@ -31,23 +33,139 @@ function AdminPanel() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Admin Panel</h1>
-        <p className="text-sm text-muted-foreground">Manage employees, locations, assignments and live tracking.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{isSuperAdmin ? "Super Admin Panel" : "Admin Panel"}</h1>
+        <p className="text-sm text-muted-foreground">
+          {isSuperAdmin
+            ? "Full control over accounts, employees, locations and tracking."
+            : "Manage your employees, their locations, assignments and live tracking."}
+        </p>
       </div>
       <Tabs defaultValue="overview">
         <TabsList className="flex-wrap">
           <TabsTrigger value="overview"><Activity className="h-4 w-4" />Overview</TabsTrigger>
+          {isSuperAdmin && <TabsTrigger value="accounts"><ShieldCheck className="h-4 w-4" />Accounts</TabsTrigger>}
           <TabsTrigger value="employees"><Users className="h-4 w-4" />Employees</TabsTrigger>
           <TabsTrigger value="locations"><MapPin className="h-4 w-4" />Locations</TabsTrigger>
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
           <TabsTrigger value="live">Live Map</TabsTrigger>
         </TabsList>
         <TabsContent value="overview"><Overview /></TabsContent>
+        {isSuperAdmin && <TabsContent value="accounts"><AccountsTab /></TabsContent>}
         <TabsContent value="employees"><EmployeesTab /></TabsContent>
         <TabsContent value="locations"><LocationsTab /></TabsContent>
         <TabsContent value="assignments"><Assignments /></TabsContent>
         <TabsContent value="live"><LiveMap /></TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function AccountsTab() {
+  const [rows, setRows] = useState<any[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "", full_name: "", role: "admin" as "admin" | "super_admin" });
+  const [pwRow, setPwRow] = useState<any | null>(null);
+  const [newPw, setNewPw] = useState("");
+
+  const fetchAccounts = useServerFn(listAccounts);
+  const createAcc = useServerFn(superCreateAccount);
+  const setActive = useServerFn(superSetActive);
+  const resetPw = useServerFn(superResetPassword);
+
+  async function load() {
+    try { setRows(await fetchAccounts()); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Failed to load"); }
+  }
+  useEffect(() => { void load(); }, []);
+
+  async function create() {
+    if (!form.email || form.password.length < 8) return toast.error("Email and password (min 8) required");
+    setBusy(true);
+    try {
+      await createAcc({ data: form });
+      toast.success(`${form.role === "super_admin" ? "Super Admin" : "Admin"} created`);
+      setForm({ email: "", password: "", full_name: "", role: "admin" });
+      await load();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+    finally { setBusy(false); }
+  }
+
+  async function toggleActive(u: any) {
+    try {
+      await setActive({ data: { user_id: u.id, active: u.banned } });
+      toast.success(u.banned ? "Activated" : "Deactivated");
+      await load();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+  }
+
+  async function doReset() {
+    if (!pwRow || newPw.length < 8) return toast.error("Password must be at least 8 characters");
+    try {
+      await resetPw({ data: { user_id: pwRow.id, password: newPw } });
+      toast.success("Password reset");
+      setPwRow(null); setNewPw("");
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader><CardTitle className="text-base">Create account</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-5">
+            <div className="sm:col-span-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+            <div><Label>Full name</Label><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></div>
+            <div><Label>Password</Label><Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
+            <div><Label>Role</Label>
+              <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as any })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="super_admin">Super Admin (User)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="mt-3"><Button onClick={create} disabled={busy}>{busy ? "Creating…" : "Create account"}</Button></div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">All accounts ({rows.length})</CardTitle></CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader><TableRow><TableHead>Email</TableHead><TableHead>Name</TableHead><TableHead>Roles</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader>
+            <TableBody>{rows.map((u) => (
+              <TableRow key={u.id}>
+                <TableCell className="font-mono text-xs">{u.email}</TableCell>
+                <TableCell>{u.full_name ?? "—"}</TableCell>
+                <TableCell><div className="flex flex-wrap gap-1">{u.roles.map((r: string) => <Badge key={r} variant="outline">{r}</Badge>)}</div></TableCell>
+                <TableCell>{u.banned ? <Badge variant="destructive">Deactivated</Badge> : <Badge>Active</Badge>}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button size="sm" variant="outline" onClick={() => setPwRow(u)}><KeyRound className="h-4 w-4" />Reset PW</Button>
+                    <Button size="sm" variant={u.banned ? "default" : "destructive"} onClick={() => toggleActive(u)}>
+                      <Power className="h-4 w-4" />{u.banned ? "Activate" : "Deactivate"}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            {rows.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-6">No accounts.</TableCell></TableRow>}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!pwRow} onOpenChange={(o) => !o && (setPwRow(null), setNewPw(""))}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Reset password for {pwRow?.email}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>New password</Label><Input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} /></div>
+            <Button className="w-full" onClick={doReset}>Update password</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
