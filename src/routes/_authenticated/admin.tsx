@@ -241,15 +241,6 @@ function EmployeesTab() {
     finally { setBusy(false); }
   }
 
-  async function setRole(userId: string, makeAdmin: boolean) {
-    if (makeAdmin) {
-      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "admin" });
-      if (error && !error.message.includes("duplicate")) return toast.error(error.message);
-    } else {
-      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "admin");
-    }
-    toast.success("Role updated");
-  }
 
   return (
     <Card>
@@ -278,7 +269,7 @@ function EmployeesTab() {
       </CardHeader>
       <CardContent>
         <Table>
-          <TableHeader><TableRow><TableHead>Code</TableHead><TableHead>Name</TableHead><TableHead>Dept</TableHead><TableHead>Designation</TableHead><TableHead>Status</TableHead><TableHead>Admin</TableHead><TableHead /></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>Code</TableHead><TableHead>Name</TableHead><TableHead>Dept</TableHead><TableHead>Designation</TableHead><TableHead>Status</TableHead><TableHead /></TableRow></TableHeader>
           <TableBody>{rows.map((r) => {
             const p = profiles[r.user_id];
             return (
@@ -288,12 +279,6 @@ function EmployeesTab() {
                 <TableCell>{r.department ?? "—"}</TableCell>
                 <TableCell>{r.designation ?? "—"}</TableCell>
                 <TableCell><Badge variant="outline">{r.status}</Badge></TableCell>
-                <TableCell>
-                  <Select onValueChange={(v) => setRole(r.user_id, v === "yes")} defaultValue="no">
-                    <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                    <SelectContent><SelectItem value="no">No</SelectItem><SelectItem value="yes">Yes</SelectItem></SelectContent>
-                  </Select>
-                </TableCell>
                 <TableCell>
                   <Button size="sm" variant="outline" onClick={() => setDetail({ ...r, profile: p })}>
                     <Eye className="h-4 w-4" />Show
