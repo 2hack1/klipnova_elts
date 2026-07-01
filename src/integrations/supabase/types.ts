@@ -24,6 +24,7 @@ export type Database = {
           longitude: number
           name: string
           notes: string | null
+          owner_user_id: string | null
           radius_meter: number
           updated_at: string
         }
@@ -36,6 +37,7 @@ export type Database = {
           longitude: number
           name: string
           notes?: string | null
+          owner_user_id?: string | null
           radius_meter?: number
           updated_at?: string
         }
@@ -48,6 +50,7 @@ export type Database = {
           longitude?: number
           name?: string
           notes?: string | null
+          owner_user_id?: string | null
           radius_meter?: number
           updated_at?: string
         }
@@ -201,6 +204,7 @@ export type Database = {
       employees: {
         Row: {
           created_at: string
+          created_by_admin: string | null
           department: string | null
           designation: string | null
           employee_code: string
@@ -213,6 +217,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by_admin?: string | null
           department?: string | null
           designation?: string | null
           employee_code: string
@@ -225,6 +230,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by_admin?: string | null
           department?: string | null
           designation?: string | null
           employee_code?: string
@@ -335,6 +341,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_active: boolean
           phone: string | null
           updated_at: string
         }
@@ -343,6 +350,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          is_active?: boolean
           phone?: string | null
           updated_at?: string
         }
@@ -351,6 +359,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_active?: boolean
           phone?: string | null
           updated_at?: string
         }
@@ -506,6 +515,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      email_exists: { Args: { _email: string }; Returns: boolean }
+      employee_owner_admin: {
+        Args: { _employee_user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -513,6 +527,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "employee" | "super_admin"
