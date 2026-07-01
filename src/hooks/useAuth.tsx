@@ -2,24 +2,29 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+export type AppRole = "super_admin" | "admin" | "employee";
+
 interface AuthCtx {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  isAdmin: boolean;
+  role: AppRole | null;
+  isSuperAdmin: boolean;
+  isAdmin: boolean; // true for admin OR super_admin (kept for backwards compat)
   employeeId: string | null;
   refresh: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthCtx>({
-  user: null, session: null, loading: true, isAdmin: false, employeeId: null, refresh: async () => {},
+  user: null, session: null, loading: true, role: null,
+  isSuperAdmin: false, isAdmin: false, employeeId: null, refresh: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState<AppRole | null>(null);
   const [employeeId, setEmployeeId] = useState<string | null>(null);
 
   async function loadMeta(uid: string) {
@@ -27,7 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("user_roles").select("role").eq("user_id", uid),
       supabase.from("employees").select("id").eq("user_id", uid).maybeSingle(),
     ]);
-    setIsAdmin((roles ?? []).some((r) => r.role === "admin"));
+    const names = (roles ?? []).map((r) => r.role as AppRole);
+    const top: AppRole | null = names.includes("super_admin") ? "super_admin"
+      : names.includes("admin") ? "admin"
+      : names.includes("employee") ? "employee" : null;
+    setRole(top);
     setEmployeeId(emp?.id ?? null);
   }
 
@@ -36,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(data.session);
     setUser(data.session?.user ?? null);
     if (data.session?.user) await loadMeta(data.session.user.id);
-    else { setIsAdmin(false); setEmployeeId(null); }
+    else { setRole(null); setEmployeeId(null); }
   }
 
   useEffect(() => {
@@ -44,13 +53,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) { void loadMeta(s.user.id); }
-      else { setIsAdmin(false); setEmployeeId(null); }
+      else { setRole(null); setEmployeeId(null); }
     });
     void (async () => { await refresh(); setLoading(false); })();
     return () => { sub.subscription.unsubscribe(); };
   }, []);
 
-  return <Ctx.Provider value={{ user, session, loading, isAdmin, employeeId, refresh }}>{children}</Ctx.Provider>;
+  const isSuperAdmin = role === "super_admin";
+  const isAdmin = role === "admin" || role === "super_admin";
+
+  return <Ctx.Provider value={{ user, session, loading, role, isSuperAdmin, isAdmin, employeeId, refresh }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() { return useContext(Ctx); }

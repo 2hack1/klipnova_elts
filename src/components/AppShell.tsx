@@ -12,14 +12,14 @@ interface NavItem { to: string; icon: typeof MapPin; label: string; adminOnly?: 
 const NAV: NavItem[] = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/track", icon: RouteIcon, label: "Live Tracking" },
-  { to: "/locations", icon: MapPin, label: "Assigned Locations" },
+  { to: "/locations", icon: MapPin, label: "Locations" },
   { to: "/history", icon: History, label: "History & Reports" },
   { to: "/profile", icon: User, label: "Profile" },
   { to: "/admin", icon: Shield, label: "Admin Panel", adminOnly: true },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, isAdmin } = useAuth();
+  const { user, role, isAdmin } = useAuth();
   const loc = useLocation();
   const nav = useNavigate();
   const [open, setOpen] = useState(false);
@@ -41,10 +41,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   const items = NAV.filter((i) => !i.adminOnly || isAdmin);
+  const roleLabel = role === "super_admin" ? "Super Admin" : role === "admin" ? "Administrator" : "Employee";
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile top bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-card px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2">
           <Button size="icon" variant="ghost" onClick={() => setOpen((v) => !v)}>{open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</Button>
@@ -57,7 +57,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <div className="flex">
-        {/* Sidebar */}
         <aside className={cn(
           "fixed inset-y-0 left-0 z-40 w-64 transform bg-sidebar text-sidebar-foreground transition-transform lg:static lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
@@ -86,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="absolute inset-x-3 bottom-3">
             <div className="mb-2 truncate rounded-md bg-sidebar-accent px-3 py-2 text-xs">
               <div className="font-medium text-sidebar-accent-foreground">{user?.email}</div>
-              <div className="text-sidebar-foreground/60">{isAdmin ? "Administrator" : "Employee"}</div>
+              <div className="text-sidebar-foreground/60">{roleLabel}</div>
             </div>
             <Button variant="secondary" size="sm" className="w-full" onClick={handleSignOut}>
               <LogOut className="h-4 w-4" />Sign out
@@ -94,7 +93,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        {/* Backdrop */}
         {open && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setOpen(false)} />}
 
         <main className="flex-1 lg:ml-0">
