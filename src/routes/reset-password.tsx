@@ -23,6 +23,7 @@ function ResetPage() {
   const [email, setEmail] = useState(search.email ?? "");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [step, setStep] = useState<"verify" | "setpw">("verify");
   const [busy, setBusy] = useState(false);
 
@@ -42,11 +43,12 @@ function ResetPage() {
   async function setNew(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 8) return toast.error("Password must be at least 8 characters");
+    if (password !== confirm) return toast.error("Passwords do not match");
     setBusy(true);
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      toast.success("Password updated. Signing you in…");
+      toast.success("Password updated.");
       nav({ to: "/dashboard" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update password");
@@ -75,6 +77,7 @@ function ResetPage() {
           ) : (
             <form onSubmit={setNew} className="space-y-3">
               <div><Label htmlFor="p">New password</Label><Input id="p" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+              <div><Label htmlFor="p2">Confirm password</Label><Input id="p2" type="password" required minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} /></div>
               <Button className="w-full" disabled={busy}>{busy && <Loader2 className="h-4 w-4 animate-spin" />}Update password</Button>
             </form>
           )}

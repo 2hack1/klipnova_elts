@@ -22,7 +22,12 @@ function ForgotPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      // shouldCreateUser:false ensures only existing users get an OTP.
+      const { data: exists, error: eErr } = await supabase.rpc("email_exists", { _email: email });
+      if (eErr) throw eErr;
+      if (!exists) {
+        toast.error("Email not found. Please enter a registered email address.");
+        return;
+      }
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: false },
