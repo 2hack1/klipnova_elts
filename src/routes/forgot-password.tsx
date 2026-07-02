@@ -23,8 +23,7 @@ function ForgotPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      const { data: exists, error: eErr } = await supabase.rpc("email_exists", { _email: email });
-      if (eErr) throw eErr;
+      const { exists } = await checkEmailExists({ data: { email } });
       if (!exists) {
         toast.error("Email not found. Please enter a registered email address.");
         return;
