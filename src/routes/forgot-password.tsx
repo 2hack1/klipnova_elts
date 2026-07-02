@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { checkEmailExists } from "@/lib/auth-helpers.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,8 +23,7 @@ function ForgotPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      const { data: exists, error: eErr } = await supabase.rpc("email_exists", { _email: email });
-      if (eErr) throw eErr;
+      const { exists } = await checkEmailExists({ data: { email } });
       if (!exists) {
         toast.error("Email not found. Please enter a registered email address.");
         return;
