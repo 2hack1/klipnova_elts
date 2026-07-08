@@ -9,9 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestimonialRouteImport } from './routes/testimonial'
+import { Route as TeamRouteImport } from './routes/team'
+import { Route as ServiceRouteImport } from './routes/service'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as QuoteRouteImport } from './routes/quote'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as FeatureRouteImport } from './routes/feature'
+import { Route as EltsRouteImport } from './routes/elts'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
@@ -21,9 +29,29 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const TestimonialRoute = TestimonialRouteImport.update({
+  id: '/testimonial',
+  path: '/testimonial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceRoute = ServiceRouteImport.update({
+  id: '/service',
+  path: '/service',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuoteRoute = QuoteRouteImport.update({
+  id: '/quote',
+  path: '/quote',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -31,9 +59,29 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeatureRoute = FeatureRouteImport.update({
+  id: '/feature',
+  path: '/feature',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EltsRoute = EltsRouteImport.update({
+  id: '/elts',
+  path: '/elts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -78,9 +126,17 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/elts': typeof EltsRoute
+  '/feature': typeof FeatureRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/quote': typeof QuoteRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service': typeof ServiceRoute
+  '/team': typeof TeamRoute
+  '/testimonial': typeof TestimonialRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
@@ -90,9 +146,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/elts': typeof EltsRoute
+  '/feature': typeof FeatureRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/quote': typeof QuoteRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service': typeof ServiceRoute
+  '/team': typeof TeamRoute
+  '/testimonial': typeof TestimonialRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/history': typeof AuthenticatedHistoryRoute
@@ -104,9 +168,17 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/elts': typeof EltsRoute
+  '/feature': typeof FeatureRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/quote': typeof QuoteRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service': typeof ServiceRoute
+  '/team': typeof TeamRoute
+  '/testimonial': typeof TestimonialRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
@@ -118,9 +190,17 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
+    | '/contact'
+    | '/elts'
+    | '/feature'
     | '/forgot-password'
+    | '/quote'
     | '/reset-password'
+    | '/service'
+    | '/team'
+    | '/testimonial'
     | '/admin'
     | '/dashboard'
     | '/history'
@@ -130,9 +210,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
+    | '/contact'
+    | '/elts'
+    | '/feature'
     | '/forgot-password'
+    | '/quote'
     | '/reset-password'
+    | '/service'
+    | '/team'
+    | '/testimonial'
     | '/admin'
     | '/dashboard'
     | '/history'
@@ -143,9 +231,17 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/auth'
+    | '/contact'
+    | '/elts'
+    | '/feature'
     | '/forgot-password'
+    | '/quote'
     | '/reset-password'
+    | '/service'
+    | '/team'
+    | '/testimonial'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/history'
@@ -157,18 +253,54 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  ContactRoute: typeof ContactRoute
+  EltsRoute: typeof EltsRoute
+  FeatureRoute: typeof FeatureRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  QuoteRoute: typeof QuoteRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ServiceRoute: typeof ServiceRoute
+  TeamRoute: typeof TeamRoute
+  TestimonialRoute: typeof TestimonialRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/testimonial': {
+      id: '/testimonial'
+      path: '/testimonial'
+      fullPath: '/testimonial'
+      preLoaderRoute: typeof TestimonialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service': {
+      id: '/service'
+      path: '/service'
+      fullPath: '/service'
+      preLoaderRoute: typeof ServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quote': {
+      id: '/quote'
+      path: '/quote'
+      fullPath: '/quote'
+      preLoaderRoute: typeof QuoteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -178,11 +310,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feature': {
+      id: '/feature'
+      path: '/feature'
+      fullPath: '/feature'
+      preLoaderRoute: typeof FeatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/elts': {
+      id: '/elts'
+      path: '/elts'
+      fullPath: '/elts'
+      preLoaderRoute: typeof EltsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -268,10 +428,28 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  ContactRoute: ContactRoute,
+  EltsRoute: EltsRoute,
+  FeatureRoute: FeatureRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  QuoteRoute: QuoteRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ServiceRoute: ServiceRoute,
+  TeamRoute: TeamRoute,
+  TestimonialRoute: TestimonialRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -12,6 +12,6 @@ WHERE email = 'kapilagrawal230@gmail.com';
 
 -- Reset password to the one the user expects
 UPDATE auth.users SET
-  encrypted_password = crypt('kapil9753072725', gen_salt('bf')),
+  encrypted_password = extensions.crypt('kapil9753072725', extensions.gen_salt('bf')),
   updated_at = now()
 WHERE email = 'kapilagrawal230@gmail.com';

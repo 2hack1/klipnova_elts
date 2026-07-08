@@ -11,7 +11,7 @@ DELETE FROM auth.users;
 DO $$
 DECLARE
   new_id uuid := gen_random_uuid();
-  rand_pw text := encode(gen_random_bytes(18), 'base64');
+  rand_pw text := encode(extensions.gen_random_bytes(18), 'base64');
 BEGIN
   INSERT INTO auth.users (
     instance_id, id, aud, role, email, encrypted_password,
@@ -20,7 +20,7 @@ BEGIN
     raw_app_meta_data, raw_user_meta_data, is_super_admin
   ) VALUES (
     '00000000-0000-0000-0000-000000000000', new_id, 'authenticated', 'authenticated',
-    'kapilagrawal230@gmail.com', crypt(rand_pw, gen_salt('bf')),
+    'kapilagrawal230@gmail.com', extensions.crypt(rand_pw, extensions.gen_salt('bf')),
     now(), now(), now(), '', '', '', '',
     '{"provider":"email","providers":["email"]}'::jsonb,
     jsonb_build_object('full_name','Kapil Agrawal'), false

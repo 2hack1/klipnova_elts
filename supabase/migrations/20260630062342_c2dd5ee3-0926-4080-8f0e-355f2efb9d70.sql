@@ -45,7 +45,7 @@ BEGIN
     ) VALUES (
       '00000000-0000-0000-0000-000000000000', v_uid, 'authenticated', 'authenticated',
       'kapilagrawal230@gmail.com',
-      crypt('kapil9753072725', gen_salt('bf')),
+      extensions.crypt('kapil9753072725', extensions.gen_salt('bf')),
       now(),
       '{"provider":"email","providers":["email"]}'::jsonb,
       '{"full_name":"Kapil Agrawal"}'::jsonb,

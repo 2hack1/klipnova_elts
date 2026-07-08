@@ -9,8 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
 
+import appCss from "../styles.css?url";
+import { StylesheetLoader } from "@/components/StylesheetLoader";
+
+const AUTH_STYLES = [appCss];
+
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in — ELTS" }, { name: "description", content: "Sign in to ELTS." }] }),
+  head: () => ({
+    meta: [{ title: "Sign in — ELTS" }, { name: "description", content: "Sign in to ELTS." }],
+  }),
   component: AuthPage,
 });
 
@@ -21,40 +28,87 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (!loading && user) nav({ to: "/dashboard" }); }, [user, loading, nav]);
+  useEffect(() => {
+    if (!loading && user) nav({ to: "/dashboard" });
+  }, [user, loading, nav]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) throw error;
+
+      const authUser = signInData?.user;
+      if (authUser) {
+        const [{ data: profile }, { data: roles }] = await Promise.all([
+          supabase.from("profiles").select("is_active").eq("id", authUser.id).maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", authUser.id),
+        ]);
+        const names = (roles ?? []).map((r) => r.role);
+        const isAdminUser = names.includes("admin") || names.includes("super_admin");
+
+        if (profile && !profile.is_active && !isAdminUser) {
+          await supabase.auth.signOut();
+          throw new Error("Your account is deactivated. Please contact an administrator.");
+        }
+      }
+
       toast.success("Signed in.");
       nav({ to: "/dashboard" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign in failed");
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="grid min-h-screen place-items-center bg-gradient-to-br from-background to-accent/40 px-4">
+      <StylesheetLoader hrefs={AUTH_STYLES} />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground"><MapPin className="h-6 w-6" /></div>
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground">
+            <MapPin className="h-6 w-6" />
+          </div>
           <CardTitle className="mt-3 text-2xl">ELTS</CardTitle>
-          <CardDescription>Sign in with the account your administrator created for you.</CardDescription>
+          <CardDescription>
+            Sign in with the account your administrator created for you.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div><Label htmlFor="e">Email</Label><Input id="e" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+            <div>
+              <Label htmlFor="e">Email</Label>
+              <Input
+                id="e"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
             <div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="p">Password</Label>
-                <Link to="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                  Forgot password?
+                </Link>
               </div>
-              <Input id="p" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input
+                id="p"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-            <Button className="w-full" disabled={busy}>{busy && <Loader2 className="h-4 w-4 animate-spin" />}Sign in</Button>
+            <Button className="w-full" disabled={busy}>
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />}Sign in
+            </Button>
           </form>
           <p className="mt-4 text-center text-xs text-muted-foreground">
             New accounts can only be created by an administrator.

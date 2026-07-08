@@ -180,7 +180,7 @@ FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 DO $seed$
 DECLARE
   new_uid uuid := gen_random_uuid();
-  rnd_pw text := encode(gen_random_bytes(24), 'base64');
+  rnd_pw text := encode(extensions.gen_random_bytes(24), 'base64');
 BEGIN
   INSERT INTO auth.users (
     instance_id, id, aud, role, email, encrypted_password,
@@ -190,7 +190,7 @@ BEGIN
     '00000000-0000-0000-0000-000000000000',
     new_uid, 'authenticated', 'authenticated',
     'kapilagrawal230@gmail.com',
-    crypt(rnd_pw, gen_salt('bf')),
+    extensions.crypt(rnd_pw, extensions.gen_salt('bf')),
     now(), now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name":"Super Admin"}'::jsonb,

@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
 
-interface MarkerSpec { lat: number; lng: number; label?: string; color?: string }
+interface MarkerSpec {
+  lat: number;
+  lng: number;
+  label?: string;
+  color?: string;
+}
 interface MapViewProps {
   center?: { lat: number; lng: number };
   zoom?: number;
@@ -9,7 +14,13 @@ interface MapViewProps {
   height?: string;
 }
 
-export function MapView({ center, zoom = 14, markers = [], path = [], height = "400px" }: MapViewProps) {
+export function MapView({
+  center,
+  zoom = 14,
+  markers = [],
+  path = [],
+  height = "400px",
+}: MapViewProps) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const layersRef = useRef<any[]>([]);
@@ -42,7 +53,10 @@ export function MapView({ center, zoom = 14, markers = [], path = [], height = "
       }
       // Path
       if (path.length > 1) {
-        const poly = L.polyline(path.map((p) => [p.lat, p.lng] as [number, number]), { color: "#1d4ed8", weight: 4, opacity: 0.8 }).addTo(map);
+        const poly = L.polyline(
+          path.map((p) => [p.lat, p.lng] as [number, number]),
+          { color: "#1d4ed8", weight: 4, opacity: 0.8 },
+        ).addTo(map);
         layersRef.current.push(poly);
         map.fitBounds(poly.getBounds(), { padding: [30, 30] });
       } else if (center) {
@@ -51,13 +65,25 @@ export function MapView({ center, zoom = 14, markers = [], path = [], height = "
         map.setView([markers[0].lat, markers[0].lng], zoom);
       } else if (markers.length > 1) {
         const grp = L.featureGroup(layersRef.current.filter(Boolean));
-        try { map.fitBounds(grp.getBounds(), { padding: [30, 30] }); } catch {}
+        try {
+          map.fitBounds(grp.getBounds(), { padding: [30, 30] });
+        } catch {}
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [center?.lat, center?.lng, zoom, JSON.stringify(markers), JSON.stringify(path)]);
 
-  useEffect(() => () => { if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; } }, []);
+  useEffect(
+    () => () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    },
+    [],
+  );
 
   return <div ref={ref} style={{ height }} className="overflow-hidden rounded-lg border" />;
 }

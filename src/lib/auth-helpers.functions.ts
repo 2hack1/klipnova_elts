@@ -2,7 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 
 export const checkEmailExists = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string }) => {
-    const email = String(d?.email ?? "").trim().toLowerCase();
+    const email = String(d?.email ?? "")
+      .trim()
+      .toLowerCase();
     if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new Error("Invalid email");
     }

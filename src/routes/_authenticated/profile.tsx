@@ -30,36 +30,100 @@ function Profile() {
 
   async function save() {
     setBusy(true);
+    if (profile.phone && profile.phone.trim() !== "") {
+      const { data: existing, error: checkError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("phone", profile.phone.trim())
+        .neq("id", user!.id)
+        .maybeSingle();
+      if (checkError) {
+        setBusy(false);
+        return toast.error("Error verifying phone number uniqueness");
+      }
+      if (existing) {
+        setBusy(false);
+        return toast.error("This phone number is already registered by another employee.");
+      }
+    }
     const { error } = await supabase.from("profiles").upsert({
-      id: user!.id, full_name: profile.full_name, phone: profile.phone,
+      id: user!.id,
+      full_name: profile.full_name,
+      phone: profile.phone ? profile.phone.trim() : null,
     });
     setBusy(false);
-    if (error) toast.error(error.message); else toast.success("Profile saved");
+    if (error) toast.error(error.message);
+    else toast.success("Profile saved");
   }
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
       <Card>
-        <CardHeader><CardTitle className="text-base">Personal info</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Personal info</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-3">
-          <div><Label>Email</Label><Input value={user?.email ?? ""} disabled /></div>
-          <div><Label>Full name</Label><Input value={profile.full_name ?? ""} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} /></div>
-          <div><Label>Phone</Label><Input value={profile.phone ?? ""} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></div>
-          <Button onClick={save} disabled={busy}>Save</Button>
+          <div>
+            <Label>Email</Label>
+            <Input value={user?.email ?? ""} disabled />
+          </div>
+          <div>
+            <Label>Full name</Label>
+            <Input
+              value={profile.full_name ?? ""}
+              onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label>Phone</Label>
+            <Input
+              value={profile.phone ?? ""}
+              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+            />
+          </div>
+          <Button onClick={save} disabled={busy}>
+            Save
+          </Button>
         </CardContent>
       </Card>
 
       {employee && (
         <Card>
-          <CardHeader><CardTitle className="text-base">Employment</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Employment</CardTitle>
+          </CardHeader>
           <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
-            <div><span className="text-muted-foreground">Code</span><div className="font-medium">{employee.employee_code}</div></div>
-            <div><span className="text-muted-foreground">Department</span><div className="font-medium">{employee.department ?? "—"}</div></div>
-            <div><span className="text-muted-foreground">Designation</span><div className="font-medium">{employee.designation ?? "—"}</div></div>
-            <div><span className="text-muted-foreground">Hire date</span><div className="font-medium">{employee.hire_date}</div></div>
-            <div><span className="text-muted-foreground">Status</span><div className="font-medium">{employee.status}</div></div>
-            <div><span className="text-muted-foreground">Role</span><div className="font-medium">{isAdmin ? "Administrator" : "Employee"}</div></div>
+            <div>
+              <span className="text-muted-foreground">Code</span>
+              <div className="font-medium">{employee.employee_code}</div>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Department</span>
+              <div className="font-medium">{employee.department ?? "—"}</div>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Designation</span>
+              <div className="font-medium">{employee.designation ?? "—"}</div>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Joining date</span>
+              <div className="font-medium">
+                {employee.joining_date ? new Date(employee.joining_date).toLocaleDateString() : "—"}
+              </div>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Status</span>
+              <div className="font-medium">{employee.status}</div>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Role</span>
+              <div className="font-medium">{isAdmin ? "Administrator" : "Employee"}</div>
+            </div>
+            <div className="col-span-2">
+              <span className="text-muted-foreground">Address</span>
+              <div className="font-medium">{employee.address ?? "—"}</div>
+            </div>
           </CardContent>
         </Card>
       )}

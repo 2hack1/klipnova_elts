@@ -1,6 +1,9 @@
 // Haversine + helpers for GPS tracking
 
-export interface LatLng { lat: number; lng: number }
+export interface LatLng {
+  lat: number;
+  lng: number;
+}
 
 const R = 6371e3; // meters
 const toRad = (d: number) => (d * Math.PI) / 180;
@@ -10,9 +13,7 @@ export function distanceMeters(a: LatLng, b: LatLng): number {
   const dLng = toRad(b.lng - a.lng);
   const lat1 = toRad(a.lat);
   const lat2 = toRad(b.lat);
-  const x =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
@@ -48,7 +49,8 @@ export function watchPosition(
 }
 
 export function clearWatch(id: number) {
-  if (typeof navigator !== "undefined" && navigator.geolocation) navigator.geolocation.clearWatch(id);
+  if (typeof navigator !== "undefined" && navigator.geolocation)
+    navigator.geolocation.clearWatch(id);
 }
 
 export function formatDuration(seconds: number): string {
