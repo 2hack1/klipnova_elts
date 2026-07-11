@@ -13,7 +13,7 @@ export function StylesheetLoader({ hrefs }: StylesheetLoaderProps) {
     hrefs.forEach((href) => {
       if (!stylesheetRefs[href]) {
         // Find existing or create new link element
-        let link = document.querySelector(`link[href="${href}"]`) as HTMLLinkElement;
+        let link = document.querySelector(`link[rel="stylesheet"][href="${href}"]`) as HTMLLinkElement;
         if (!link) {
           link = document.createElement("link");
           link.rel = "stylesheet";

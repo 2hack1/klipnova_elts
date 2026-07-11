@@ -94,6 +94,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/svg+xml", href: "/icon.svg" },
       { rel: "apple-touch-icon", href: "/icon.svg" },
+      // Preload CSS to resolve FOUC (late CSS styling)
+      { rel: "preload", href: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Rubik:wght@400;500;600;700&display=swap", as: "style" },
+      { rel: "preload", href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css", as: "style" },
+      { rel: "preload", href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css", as: "style" },
+      { rel: "preload", href: "/lib/animate/animate.min.css", as: "style" },
+      { rel: "preload", href: "/css/bootstrap.min.css", as: "style" },
+      { rel: "preload", href: "/css/style.css", as: "style" },
     ],
   }),
   shellComponent: RootShell,

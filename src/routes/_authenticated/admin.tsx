@@ -146,6 +146,7 @@ function AccountsTab() {
     password: "",
     full_name: "",
     role: "admin" as "admin" | "super_admin",
+    employee_limit: 6,
   });
   const [pwRow, setPwRow] = useState<any | null>(null);
   const [newPw, setNewPw] = useState("");
@@ -173,7 +174,7 @@ function AccountsTab() {
     try {
       await createAcc({ data: form });
       toast.success(`${form.role === "super_admin" ? "Super Admin" : "Admin"} created`);
-      setForm({ email: "", password: "", full_name: "", role: "admin" });
+      setForm({ email: "", password: "", full_name: "", role: "admin", employee_limit: 6 });
       await load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -229,6 +230,7 @@ function AccountsTab() {
                   <TableHead>Email</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Created By</TableHead>
+                  {title === "Admin Accounts" && <TableHead>Limit</TableHead>}
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -241,6 +243,11 @@ function AccountsTab() {
                     <TableCell className="text-sm text-muted-foreground">
                       {u.created_by_detail ?? "System / Seed"}
                     </TableCell>
+                    {title === "Admin Accounts" && (
+                      <TableCell className="text-sm font-semibold text-primary">
+                        {u.employee_limit ?? 6}
+                      </TableCell>
+                    )}
                     <TableCell>
                       {u.banned ? (
                         <Badge variant="destructive">Deactivated</Badge>
@@ -363,7 +370,7 @@ function AccountsTab() {
           <CardTitle className="text-base">Create Admin / Super Admin Account</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-5">
+          <div className={`grid gap-3 grid-cols-1 sm:grid-cols-2 ${form.role === "admin" ? "md:grid-cols-6" : "md:grid-cols-5"}`}>
             <div className="sm:col-span-2 md:col-span-2">
               <Label>Email</Label>
               <Input
@@ -399,6 +406,17 @@ function AccountsTab() {
                 </SelectContent>
               </Select>
             </div>
+            {form.role === "admin" && (
+              <div>
+                <Label>Employee Limit</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={form.employee_limit}
+                  onChange={(e) => setForm({ ...form, employee_limit: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            )}
           </div>
           <div className="mt-3">
             <Button onClick={create} disabled={busy}>

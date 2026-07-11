@@ -27,6 +27,25 @@ export const adminCreateEmployee = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Check employee limit for standard admins (exempting super_admins)
+    if (!roles.has("super_admin")) {
+      const { data: adminUser, error: adminErr } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+      if (adminErr || !adminUser.user) throw new Error("Failed to verify administrator metadata");
+      
+      const limit = adminUser.user.user_metadata?.employee_limit ?? 6;
+      
+      const { count, error: countErr } = await supabaseAdmin
+        .from("employees")
+        .select("id", { count: "exact", head: true })
+        .eq("created_by_admin", context.userId);
+      
+      if (countErr) throw new Error("Failed to verify employee count limit");
+      
+      if (count !== null && count >= limit) {
+        throw new Error(`Employee creation limit reached: You have created ${count}/${limit} employees. Contact your Super Admin to upgrade your plan.`);
+      }
+    }
+
     // Enforce mobile/phone number uniqueness
     if (data.phone) {
       const { data: existingPhone } = await supabaseAdmin
@@ -112,6 +131,7 @@ type CreateAccountInput = {
   password: string;
   full_name?: string;
   role: "admin" | "super_admin";
+  employee_limit?: number;
 };
 
 export const superCreateAccount = createServerFn({ method: "POST" })
@@ -130,6 +150,7 @@ export const superCreateAccount = createServerFn({ method: "POST" })
       user_metadata: {
         full_name: data.full_name ?? "",
         created_by: context.userId,
+        employee_limit: data.employee_limit ?? 6,
       },
     });
     if (error || !created.user) throw new Error(error?.message ?? "Failed to create user");
@@ -221,6 +242,7 @@ export const listAccounts = createServerFn({ method: "GET" })
         roles: roleMap.get(u.id) ?? [],
         created_at: u.created_at,
         created_by_detail,
+        employee_limit: u.user_metadata?.employee_limit ?? 6,
       };
     });
   });

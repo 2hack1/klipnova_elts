@@ -100,12 +100,12 @@ function Contact() {
               </form>
             </div>
             <div className="col-lg-6 wow slideInUp" data-wow-delay="0.6s">
-              <iframe 
+              <iframe
                 className="position-relative rounded w-100 h-100"
                 src="https://maps.google.com/maps?q=Morar,Gwalior,Madhya%20Pradesh,India&t=&z=13&ie=UTF8&iwloc=&output=embed"
-                frameBorder="0" 
-                style={{ minHeight: "350px", border: 0 }} 
-                allowFullScreen={true} 
+                frameBorder="0"
+                style={{ minHeight: "350px", border: 0 }}
+                allowFullScreen={true}
                 aria-hidden="false"
                 tabIndex={0}
                 title="Google Map"

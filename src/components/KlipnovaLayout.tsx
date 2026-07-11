@@ -161,7 +161,7 @@ export function KlipnovaLayout({ children }: KlipnovaLayoutProps) {
 
       {/* Navbar Start */}
       <div className="container-fluid position-relative p-0">
-        <nav className={`navbar navbar-expand-lg navbar-dark px-5 py-3 py-lg-0 ${isSticky ? "sticky-top shadow-sm" : ""}`} style={isSticky ? { top: 0, position: "fixed", width: "100%", zIndex: 999, background: "#091E3E" } : {}}>
+        <nav className={`navbar navbar-expand-lg navbar-dark px-5 py-3 py-lg-0 ${isSticky ? "sticky-top shadow-sm" : ""}`} style={isSticky ? { top: 0, position: "fixed", width: "100%", zIndex: 999, background: "#ffffff" } : {}}>
           <Link to="/" className="navbar-brand p-0">
             <h1 className="m-0"><i className="me-2"></i>Klip<span style={{ color: "rgb(255, 179, 0)" }}>Nova</span> </h1>
             <div className="check" style={{ fontSize: "14px", color: "#bbb", textAlign: "center", textTransform: "uppercase", letterSpacing: "2px", marginTop: "-5px" }}>
@@ -169,23 +169,23 @@ export function KlipnovaLayout({ children }: KlipnovaLayoutProps) {
             </div>
           </Link>
 
-          <button 
-            className="navbar-toggler" 
-            type="button" 
+          <button
+            className="navbar-toggler"
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-controls="navbarCollapse" 
-            aria-expanded={mobileMenuOpen} 
+            aria-controls="navbarCollapse"
+            aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation"
           >
             <span className="fa fa-bars"></span>
           </button>
-          
+
           <div className={`collapse navbar-collapse ${mobileMenuOpen ? "show" : ""}`} id="navbarCollapse">
             <div className="navbar-nav ms-auto py-0">
               <Link to="/" className={`nav-item nav-link ${isActive("/")}`}>Home</Link>
               <Link to="/about" className={`nav-item nav-link ${isActive("/about")}`}>About</Link>
               <Link to="/service" className={`nav-item nav-link ${isActive("/service")}`}>Services</Link>
-              
+
               {/* Dropdown with hover styling */}
               <div className="nav-item dropdown dropdown-hover">
                 <a href="#" className="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
@@ -196,12 +196,12 @@ export function KlipnovaLayout({ children }: KlipnovaLayoutProps) {
                   <Link to="/quote" className="dropdown-item">Free Quote</Link>
                 </div>
               </div>
-              
+
               <Link to="/contact" className={`nav-item nav-link ${isActive("/contact")}`}>Contact</Link>
-              
+
               {/* Added ELTS option */}
-              <Link 
-                to="/elts" 
+              <Link
+                to="/elts"
                 className="nav-item nav-link px-3 py-2 ms-lg-3 rounded bg-warning text-dark font-weight-bold"
                 style={{ fontWeight: "700", alignSelf: "center", display: "inline-block" }}
               >
@@ -222,10 +222,10 @@ export function KlipnovaLayout({ children }: KlipnovaLayoutProps) {
       <div className="container-fluid bg-dark text-light mt-5 wow fadeInUp" data-wow-delay="0.1s" style={{ background: "#091E3E" }}>
         <div className="container">
           <div className="row gx-5">
-            <div className="col-lg-4 col-md-6 footer-about" style={{ marginTop: "-20px", background: "rgb(255, 179, 0)", padding: "30px", borderRadius: "4px" }}>
+            <div className="col-lg-4 col-md-6 footer-about" style={{ marginTop: "-20px", background: "#06A3DA", padding: "30px", borderRadius: "4px" }}>
               <div className="d-flex flex-column align-items-center justify-content-center text-center h-100">
                 <Link to="/" className="text-white text-decoration-none">
-                  <h1 className="m-0 text-white">KlipNova</h1>
+                  <h1 className="m-0 text-white"><span style={{ color: "rgb(9, 30, 62)" }}>Klip</span><span style={{ color: "rgb(255, 179, 0)" }}>Nova</span></h1>
                 </Link>
                 <p className="mt-3 text-white">We deliver cutting-edge digital solutions tailored for your business success, including IT consulting, custom software, and employee tracking platforms.</p>
               </div>
@@ -297,8 +297,8 @@ export function KlipnovaLayout({ children }: KlipnovaLayoutProps) {
       {/* Footer End */}
 
       {/* Back to Top */}
-      <a 
-        href="#" 
+      <a
+        href="#"
         onClick={scrollToTop}
         className={`btn btn-lg btn-primary btn-lg-square rounded back-to-top ${showBackToTop ? "d-inline-block" : "d-none"}`}
         style={{ position: "fixed", bottom: "45px", right: "45px", zIndex: 99 }}
