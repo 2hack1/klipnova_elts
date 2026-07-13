@@ -260,17 +260,17 @@ function Landing() {
                 </div>
               </a>
               <a
-                href="tel:+911234567890"
+                href="tel:+919131475945"
                 className="flex items-center gap-3 rounded-xl border bg-card p-5"
               >
                 <Phone className="h-5 w-5 text-primary" />
                 <div>
                   <div className="text-sm text-muted-foreground">Phone</div>
-                  <div className="font-medium">+91 12345 67890</div>
+                  <div className="font-medium">+91 91314 75945</div>
                 </div>
               </a>
               <a
-                href="https://wa.me/919131475945"
+                href="https://wa.me/916269676461"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 rounded-xl border bg-card p-5"
@@ -284,7 +284,7 @@ function Landing() {
                 </svg>
                 <div>
                   <div className="text-sm text-muted-foreground">WhatsApp</div>
-                  <div className="font-medium">+91 91314 75945 (WhatsApp only)</div>
+                  <div className="font-medium">+91 6269676461</div>
                 </div>
               </a>
             </div>
